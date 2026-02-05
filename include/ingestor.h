@@ -1,0 +1,5 @@
+#ifndef ENERGYMONITOR_INGESTOR_H_
+#define ENERGYMONITOR_INGESTOR_H_
+
+
+#endif

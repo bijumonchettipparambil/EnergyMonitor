@@ -7,7 +7,7 @@
 
 #include "energy_monitor.h"
 
-pid_t fork_child_process();
+pid_t create_child_process();
 void create_and_print_json_stub(char*, size_t);
 void write_to_buffer(char*, size_t, usage_snapshot);
 usage_snapshot initialise_snapshot_stub(uint64_t, double, double, double, double, uint8_t);
@@ -15,7 +15,7 @@ usage_snapshot initialise_snapshot_stub(uint64_t, double, double, double, double
 int main()
 {
     int status;
-    pid_t child_pid = fork_child_process();
+    pid_t child_pid = create_child_process();
 
     if(child_pid > 0)
     {
@@ -29,16 +29,16 @@ int main()
     return 0;
 }
 
-pid_t fork_child_process()
+pid_t create_child_process()
 {
     pid_t pid = fork();
     if (0 == pid)
     {
-        fprintf(stdout, "[INFO] In child process...\n");
+        fprintf(stdout, "[INFO] Child: In child process...\n");
         size_t BUFFER_SIZE = 256;
         char buffer[BUFFER_SIZE];
         create_and_print_json_stub(buffer, BUFFER_SIZE);
-        fprintf(stdout, "[INFO] Exiting child process...\n");
+        fprintf(stdout, "[INFO] Child: Exiting child process...\n");
         exit(EXIT_SUCCESS);
     }
 
