@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 
 #include "energy_monitor.h"
+#include "log.h"
 
 pid_t create_child_process();
 void create_and_print_json_stub(char*, size_t);
@@ -14,6 +15,10 @@ usage_snapshot initialise_snapshot_stub(uint64_t, double, double, double, double
 
 int main()
 {
+
+    LOG(INFO, "Testing variables: Integer=%d, Float=%.2f\n", 999, 3.141514);
+    set_log_level(DEBUG);   
+    LOG(DEBUG, "%s", "Test debug message...\n");
     int status;
     pid_t child_pid = create_child_process();
 
@@ -22,7 +27,8 @@ int main()
         waitpid(child_pid, &status, 0);
         if (WIFEXITED(status))
         {
-            printf("[INFO] Parent: Child with %d exited with status %d.\n", child_pid, WEXITSTATUS(status));
+            
+            LOG(INFO, "Parent: Child with %d exited with status %d.\n", child_pid, WEXITSTATUS(status));
         }
     }
         
@@ -34,11 +40,11 @@ pid_t create_child_process()
     pid_t pid = fork();
     if (0 == pid)
     {
-        fprintf(stdout, "[INFO] Child: In child process...\n");
+        LOG(INFO, "Child: In child process...\n");
         size_t BUFFER_SIZE = 256;
         char buffer[BUFFER_SIZE];
         create_and_print_json_stub(buffer, BUFFER_SIZE);
-        fprintf(stdout, "[INFO] Child: Exiting child process...\n");
+        LOG(INFO, "Child: Exiting child process...\n");
         exit(EXIT_SUCCESS);
     }
 
@@ -50,21 +56,19 @@ void create_and_print_json_stub(char* buffer, size_t length)
 {
     if (NULL == buffer)
     {
-        fprintf(stderr, "[ERROR] %s.%s.%d: Invalid buffer supplied.\n",
-               __FILE__, __func__, __LINE__);
+        LOG(ERROR, "Invalid buffer supplied.\n");
         exit(EXIT_FAILURE);
     }
 
     size_t BUFFER_SIZE = 256;
     if (length < BUFFER_SIZE)
-         fprintf(stderr, "[ERROR] %s.%s.%d: Require a buffer of at least %zu, available %zu.\n",
-               __FILE__, __func__, __LINE__, BUFFER_SIZE, length);
+         LOG(ERROR, "Requires a buffer of at least %zu, available %zu.\n", BUFFER_SIZE, length);
      
     usage_snapshot stub = initialise_snapshot_stub((uint64_t) 1717379654, (double) 3.12345,(double) 0.001323, 
             (double) 1.433566, (double) 0.0014424, (uint8_t) 15);
 
     write_to_buffer(buffer, length, stub);
-    printf("JSON: %s.\n", buffer);
+    LOG(INFO, "JSON: %s.\n", buffer);
     
 }
 
@@ -72,11 +76,11 @@ void write_to_buffer(char* buffer, size_t length, usage_snapshot snapshot)
 {
     size_t response = snprintf(buffer, length, "{\"timestamp\": %lu, \"electric_usage\": %.10lf, \"electric_cost\""
             ": %0.10lf, \"gas_cost\": %0.10lf, \"gas_usage\": %0.10lf, \"status_flags\": %d}",
-            snapshot.timestamp, snapshot.electric_usage, snapshot.electric_cost, snapshot.gas_usage, snapshot.gas_cost, snapshot.status);
+            snapshot.timestamp, snapshot.electric_usage, snapshot.electric_cost, snapshot.gas_usage, 
+            snapshot.gas_cost, snapshot.status);
 
     if (length <= response)
-        fprintf(stderr, "[ERROR] %s.%s.%d: JSON payload truncated, required buffer size %ld, available %ld.\n",
-               __FILE__, __func__, __LINE__, response, length);
+        LOG(ERROR, "JSON payload truncated, required buffer size %ld, available %ld.\n", response, length);
 
 }
 

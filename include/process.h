@@ -19,13 +19,16 @@ pid_t create_child_process();
 
 /**
 
-  Checks if the current process is a child process or not.
+  Checks if the current process is a parent process or not.
 
   @param process id returned by the fork.
-  @returns 1(true) if current process is child.
+  @returns 1(true) if current process is parent.
 
 */
-int is_parent(const pid_t pid);
+static inline int is_parent(const pid_t pid)
+{
+    return 0 < pid;
+}
 
 /**
 
@@ -35,7 +38,37 @@ int is_parent(const pid_t pid);
   @returns 1(true) if current process is child.
 
 */
-int is_child(const pid_t pid);
+static inline int is_child(const pid_t pid)
+{
+    return 0 == pid;
+}
+
+/**
+
+  Checks if the fork call was successful.
+
+  @param process id returned by the fork.
+  @returns 1(true) if request was successful.
+
+*/
+static inline int is_successful(const pid_t pid)
+{
+    return 0 <= pid;
+}
+
+/**
+
+  Checks if the fork call failed.
+
+  @param process id returned by the fork.
+  @returns 1(true) if request failed.
+
+*/
+static inline int has_failed(const pid_t pid)
+{
+    return 0 > pid;
+}
+
 
 /**
 
