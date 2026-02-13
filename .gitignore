@@ -1,1 +1,4 @@
 EnergyMonitor
+.vscode
+./app/main.d
+./app/main.o

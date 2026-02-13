@@ -4,9 +4,11 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <string.h>
 
 #include "energy_monitor.h"
 #include "log.h"
+#include "json.h"
 
 pid_t create_child_process();
 void create_and_print_json_stub(char*, size_t);
@@ -16,9 +18,13 @@ usage_snapshot initialise_snapshot_stub(uint64_t, double, double, double, double
 int main()
 {
 
-    LOG(INFO, "Testing variables: Integer=%d, Float=%.2f\n", 999, 3.141514);
+    const char* json_str = "{\"timestamp\": 1717379654, \"electric_usage\": 3.1234500000, \"electric_cost\": 0.0013230000, \"gas_cost\": 1.4335660000, \"gas_usage\": 0.0014424000, \"status_flags\": \"15\", \"switch\" : true, \"is_cancelled\" : false, \"updatedtimestamp\" : null}";
+
+    parse_json(json_str, strlen(json_str));
+
+//    LOG(INFO, "Testing variables: Integer=%d, Float=%.2f\n", 999, 3.141514);
     set_log_level(DEBUG);   
-    LOG(DEBUG, "%s", "Test debug message...\n");
+//    LOG(DEBUG, "%s", "Test debug message...\n");
     int status;
     pid_t child_pid = create_child_process();
 
@@ -27,8 +33,7 @@ int main()
         waitpid(child_pid, &status, 0);
         if (WIFEXITED(status))
         {
-            
-            LOG(INFO, "Parent: Child with %d exited with status %d.\n", child_pid, WEXITSTATUS(status));
+            //LOG(INFO, "Parent: Child with %d exited with status %d.\n", child_pid, WEXITSTATUS(status));
         }
     }
         
@@ -40,11 +45,11 @@ pid_t create_child_process()
     pid_t pid = fork();
     if (0 == pid)
     {
-        LOG(INFO, "Child: In child process...\n");
+        //LOG(INFO, "Child: In child process...\n");
         size_t BUFFER_SIZE = 256;
         char buffer[BUFFER_SIZE];
         create_and_print_json_stub(buffer, BUFFER_SIZE);
-        LOG(INFO, "Child: Exiting child process...\n");
+        //LOG(INFO, "Child: Exiting child process...\n");
         exit(EXIT_SUCCESS);
     }
 
@@ -68,7 +73,7 @@ void create_and_print_json_stub(char* buffer, size_t length)
             (double) 1.433566, (double) 0.0014424, (uint8_t) 15);
 
     write_to_buffer(buffer, length, stub);
-    LOG(INFO, "JSON: %s.\n", buffer);
+    //LOG(INFO, "JSON: %s.\n", buffer);
     
 }
 
