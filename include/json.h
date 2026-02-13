@@ -2,214 +2,142 @@
 #define _JSON_JSON_H_
 
 #include <stdint.h>
-#include <string.h>
 
 #include "log.h"
 
-int is_object_begin(const char ch)
-{
-    return '{' == ch;
-}
+/**
+ * @brief Checks if the character is the start of a JSON object.
+ * @param ch Character to check.
+ * @return 1 if '{', 0 otherwise.
+ */
+int is_object_begin(const char ch);
 
-int is_object_end(const char ch)
-{
-    return '}' == ch;
-}
+/**
+ * @brief Checks if the character is the end of a JSON object.
+ * @param ch Character to check.
+ * @return 1 if '}', 0 otherwise.
+ */
+int is_object_end(const char ch);
 
-int is_number(const char ch)
-{
-    return ((0x30 <= ch && 0x39 >= ch) || 
-            '-' == ch || 
-            '+' == ch || 
-            '.' == ch);
-}
+/**
+ * @brief Validates if a character is part of a valid JSON number.
+ * Supports digits, signs ('+', '-'), and decimal points ('.').
+ * @param ch Character to check.
+ * @return 1 if valid number character, 0 otherwise.
+ */
+int is_number(const char ch);
 
-int is_list_begin(const char ch)
-{
-    return '[' == ch;
-}
+/**
+ * @brief Checks if the character is the start of a JSON list (array).
+ * @param ch Character to check.
+ * @return 1 if '[', 0 otherwise.
+ */
+int is_list_begin(const char ch);
 
-int is_list_end(const char ch)
-{
-    return ']' == ch;
-}
+/**
+ * @brief Checks if the character is the end of a JSON list (array).
+ * @param ch Character to check.
+ * @return 1 if ']', 0 otherwise.
+ */
+int is_list_end(const char ch);
 
-int is_separator(const char ch)
-{
-    return ':' == ch;
-}
+/**
+ * @brief Checks if the character is a JSON key-value separator.
+ * @param ch Character to check.
+ * @return 1 if ':', 0 otherwise.
+ */
+int is_separator(const char ch);
 
-int is_quote(const char ch)
-{
-    return '"' == ch;
-}
+/**
+ * @brief Checks if the character is a double quote, used for strings.
+ * @param ch Character to check.
+ * @return 1 if '"', 0 otherwise.
+ */
+int is_quote(const char ch);
 
-int is_space(const char ch)
-{
-    return ' ' == ch;
-}
+/**
+ * @brief Checks if the character is a standard space.
+ * @param ch Character to check.
+ * @return 1 if ' ', 0 otherwise.
+ */
+int is_space(const char ch);
 
-int is_comma(const char ch)
-{
-    return ',' == ch;
-}
+/**
+ * @brief Checks if the character is a JSON element separator.
+ * @param ch Character to check.
+ * @return 1 if ',', 0 otherwise.
+ */
+int is_comma(const char ch);
 
-int is_boolean(const char* json)
-{
-    return (0 == strncmp(json, "true", 4) || 
-            0 == strncmp(json, "false", 5));
-}
+/**
+ * @brief Performs lookahead to check for JSON boolean literals.
+ * @param json Pointer to the current position in the buffer.
+ * @return 1 if "true" or "false" is found, 0 otherwise.
+ */
+int is_boolean(const char* json);
 
-int is_null(const char* json)
-{
-    return (0 == strncmp(json, "null", 4)); 
-}
+/**
+ * @brief Performs lookahead to check for a JSON null literal.
+ * @param json Pointer to the current position in the buffer.
+ * @return 1 if "null" is found, 0 otherwise.
+ */
+int is_null(const char* json);
 
-size_t json_string(const char* json, size_t json_length)
-{
-    const char* value = json;
-    size_t value_length = 0;
-    while(!is_quote(*json) && 0 < json_length)
-    {
-        ++json;
-        ++value_length;
-        --json_length;
-    }
-    //TODO Handle missing quote
-    LOG(DEBUG, "JSON Length    : %zu\n", json_length);
-    LOG(DEBUG, "String length   : %zu\n", value_length);
-    LOG(INFO, "String          : %.*s\n", (int) value_length, value);
-    return json_length; 
-}
+/**
+ * @brief Consumes a string from the JSON buffer until the closing quote.
+ * @param json Pointer starting after the opening quote.
+ * @param json_length Remaining length of the buffer.
+ * @return Remaining json_length after consuming the string content.
+ */
+size_t json_string(const char* json, size_t json_length);
 
-size_t json_number(const char* json, size_t json_length)
-{
-    const char* value = json;
-    size_t value_length = 0;
-    while(is_number(*json) && 0 < json_length) 
-    {
-        ++json;
-        ++value_length;
-        --json_length;
-    }
-    LOG(DEBUG, "JSON Length    : %zu\n", json_length);
-    LOG(DEBUG, "Number length  : %zu\n", value_length);
-    LOG(INFO, "Number          : %.*s\n", (int) value_length, value);
-    return json_length;
-}
+/**
+ * @brief Consumes a numeric value from the JSON buffer.
+ * @param json Pointer to the first digit or sign of the number.
+ * @param json_length Remaining length of the buffer.
+ * @return Remaining json_length after consuming the number.
+ */
+size_t json_number(const char* json, size_t json_length);
 
-size_t json_boolean(const char* json, size_t json_length)
-{
-    const char* json_true = "true";
-    const char* json_false = "false";    
-    const char* value = json;
-    size_t value_length = 0;
-    if (strncmp(json, json_true, 4) == 0)
-    {
-        value_length = 4;
-        json += 4; 
-        json_length -= 4;
-    }
+/**
+ * @brief Consumes a boolean literal ("true" or "false") from the buffer.
+ * @param json Pointer to the start of the literal.
+ * @param json_length Remaining length of the buffer.
+ * @return Remaining json_length after consuming the boolean.
+ */
+size_t json_boolean(const char* json, size_t json_length);
 
-    if (strncmp(json, json_false, 5) == 0)
-    {
-        value_length = 5;
-        json += 5;
-        json_length -= 5;
-    }
-    LOG(DEBUG, "JSON Length    : %zu\n", json_length);
-    LOG(DEBUG, "Boolean length  : %zu\n", value_length);
-    LOG(INFO, "Boolean       : %.*s\n", (int) value_length, value);
-    return json_length;
-}
+/**
+ * @brief Consumes a "null" literal from the buffer.
+ * @param json Pointer to the start of "null".
+ * @param json_length Remaining length of the buffer.
+ * @return Remaining json_length after consuming "null".
+ */
+size_t json_null(const char* json, size_t json_length);
 
-size_t json_null(const char* json, size_t json_length)
-{
-    const char* json_null = "null";
-    const char* value = json;
-    size_t value_length = 0;
-    if (strncmp(json, json_null, 4) == 0)
-    {
-        value_length = 4;
-        json += 4; 
-        json_length -= 4;
-    }
-    LOG(DEBUG, "JSON Length    : %zu\n", json_length);
-    LOG(DEBUG, "Null length  : %zu\n", value_length);
-    LOG(INFO, "Null             : %.*s\n", (int) value_length, value);
-    return json_length;
-}
+/**
+ * @brief Skips whitespace, commas, and non-separator characters.
+ * @param json Pointer to the current position.
+ * @param json_length Remaining length of the buffer.
+ * @return Updated remaining buffer length.
+ */
+size_t strip_white_spaces(const char* json, size_t json_length);
 
+/**
+ * @brief Identifies the token type at the current pointer and delegates to type-specific parsers.
+ * Handles strings (including quote stripping), numbers, booleans, and nulls.
+ * @param json Pointer to the current attribute/value.
+ * @param json_length Remaining length of the buffer.
+ * @return Updated remaining buffer length after processing the attribute.
+ */
+size_t parse_attributes(const char* json, size_t json_length);
 
-size_t strip_white_spaces(const char* json, size_t json_length)
-{
-     while ((is_space(*json) || is_comma(*json) || !is_separator(*json)) && 0 < json_length)
-    {
-        ++json;
-       --json_length;
-    }
-    return json_length;  
-}
-
-size_t parse_attributes(const char* json, size_t json_length)
-{
-    // String: Parse and extract word.
-    if (is_quote(*json))
-    {
-        // Skip starting quote from being re-processed
-        ++json;
-        --json_length;
-        json_length = json_string(json, json_length);
-        // Skip ending quote from being re-processed
-        ++json;
-        --json_length;
-        return json_length;
-   }
-
-    // Number: Parse and extract number.
-    if (is_number(*json))
-    {
-        json_length = json_number(json, json_length);
-        return json_length;
-    }
-
-    // Boolean: Parsed and extract boolean.
-    if (is_boolean(json))
-    {
-        json_length = json_boolean(json, json_length);
-        return json_length;
-    }
-
-    // Null: Parsed and extract null.
-    if (is_null(json))
-    {
-        json_length = json_null(json, json_length);
-        return json_length;
-    }
-    return json_length;
-}
-
-void parse_json(const char* json, size_t json_length)
-{
-    LOG(INFO, "JSON: %s\n", json);
-    LOG(INFO, "JSON Length: %zu\n", json_length);
-    while (0 < json_length)
-    {
-        size_t remaining_json_length = parse_attributes(json, json_length);
-        size_t tokens_parsed = json_length - remaining_json_length;
-        LOG(DEBUG, "Remaining JSON: %zu\n", remaining_json_length);
-        LOG(DEBUG, "Tokens parsed : %zu\n", tokens_parsed);
-        json += tokens_parsed;
-        json_length = remaining_json_length;
-        LOG(DEBUG, "Current json pointed at: %c\n", *json);
-        if (0 < remaining_json_length)
-        {
-            ++json;
-            --json_length;
-        }
-        LOG(DEBUG, "JSON LEN: %zu\n", json_length);
-    }
-}
-
+/**
+ * @brief Primary entry point for the linear JSON parser.
+ * Iteratively parses attributes and advances the buffer pointer until the length is exhausted.
+ * @param json Pointer to the start of the JSON string.
+ * @param json_length Total length of the JSON string.
+ */
+void parse_json(const char* json, size_t json_length);
+    
 #endif
-
