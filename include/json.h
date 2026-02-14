@@ -1,9 +1,62 @@
-#ifndef _JSON_JSON_H_
-#define _JSON_JSON_H_
+#ifndef JSON_JSON_H_
+#define JSON_JSON_H_
 
 #include <stdint.h>
 
 #include "log.h"
+
+/**
+ * Constants
+ */
+// Maximum memory 
+#define MAX_HEAP_BYTES 1000000
+
+/**
+ * @brief Enum defining JSON item types.
+ */
+typedef enum
+{
+    STRING = 0,
+    INTEGER = 1,
+    FLOAT = 2,
+    BOOLEAN = 3,
+    NULL_VALUE = 4
+
+} json_item_type;
+
+/**
+ * @brief Enum defining JSON item types.
+ */
+typedef enum
+{
+    OBJECT = 0,
+    ARRAY = 1,
+    ITEM = 2
+} json_object_type;
+
+/**
+ * @brief Deserialised JSON data item, i.e., a name/value pair.
+ */
+typedef struct
+{
+    const char* key;
+    const size_t key_length;
+    const char* value;
+    const size_t value_length;
+    const json_item_type item_type;
+} json_item;
+
+/**
+ * @brief Deserialised JSON object, may contain zero or more json_items.
+ */
+typedef struct
+{
+    const char* name;
+    const json_object_type object_type;
+    void* item;
+    size_t size;
+    size_t capacity;
+} json_object;
 
 /**
  * @brief Checks if the character is the start of a JSON object.
@@ -116,12 +169,32 @@ size_t json_boolean(const char* json, size_t json_length);
 size_t json_null(const char* json, size_t json_length);
 
 /**
- * @brief Skips whitespace, commas, and non-separator characters.
- * @param json Pointer to the current position.
- * @param json_length Remaining length of the buffer.
- * @return Updated remaining buffer length.
+ * @brief Checks if a character indicates a floating-point or scientific notation.
+ * @param ch The character to evaluate (e.g., '.', 'e', 'E').
+ * @return 1 if it is a float-indicator, 0 otherwise.
  */
-size_t strip_white_spaces(const char* json, size_t json_length);
+int is_float(const char ch);
+
+/**
+ * @brief Detects the start of a JSON container (Object or Array).
+ * @param ch The character to evaluate ('{' or '[').
+ * @return 1 if it is a start bracket, 0 otherwise.
+ */
+int is_begin_marker(const char ch);
+
+/**
+ * @brief Detects the end of a JSON container (Object or Array).
+ * @param ch The character to evaluate ('}' or ']').
+ * @return 1 if it is an end bracket, 0 otherwise.
+ */
+int is_end_marker(const char ch);
+
+/**
+ * @brief Determines if a quote character is escaped by a preceding backslash.
+ * @param json Pointer to the current quote in the JSON buffer.
+ * @return 1 if the quote is escaped (e.g., \"), 0 if it is a literal/closing quote.
+ */
+int is_quote_with_escape_sequence(const char* json);
 
 /**
  * @brief Identifies the token type at the current pointer and delegates to type-specific parsers.
@@ -138,6 +211,6 @@ size_t parse_attributes(const char* json, size_t json_length);
  * @param json Pointer to the start of the JSON string.
  * @param json_length Total length of the JSON string.
  */
-void parse_json(const char* json, size_t json_length);
+void parse_json_object(const char* json, size_t json_length);
     
 #endif

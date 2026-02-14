@@ -17,14 +17,11 @@ usage_snapshot initialise_snapshot_stub(uint64_t, double, double, double, double
 
 int main()
 {
-
-    const char* json_str = "{\"timestamp\": 1717379654, \"electric_usage\": 3.1234500000, \"electric_cost\": 0.0013230000, \"gas_cost\": 1.4335660000, \"gas_usage\": 0.0014424000, \"status_flags\": \"15\", \"switch\" : true, \"is_cancelled\" : false, \"updatedtimestamp\" : null}";
-
-    parse_json(json_str, strlen(json_str));
-
-//    LOG(INFO, "Testing variables: Integer=%d, Float=%.2f\n", 999, 3.141514);
     set_log_level(DEBUG);   
-//    LOG(DEBUG, "%s", "Test debug message...\n");
+    LOG(INFO, "\"Test\\\\\\\n");
+    const char* json_str = "{\"timestamp\": 1717379654, \"electric_usage\": 3.1234500000, \"electric_cost\": 0.0013230000, \"gas_cost\": 1.4335660000, \"gas_usage\": 0.0014424000, \"status_flags\": \"15\", \"switch\" : true, \"is_cancelled\" : false, \"updatedtimestamp\" : null, \"Path\" : \"Test\\\\\\\"\\\\\\\\\"\", \"exponent\" : 1.5e+10}";
+
+    parse_json_object(json_str, strlen(json_str));
     int status;
     pid_t child_pid = create_child_process();
 
@@ -36,7 +33,6 @@ int main()
             //LOG(INFO, "Parent: Child with %d exited with status %d.\n", child_pid, WEXITSTATUS(status));
         }
     }
-        
     return 0;
 }
 
