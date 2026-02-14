@@ -43,6 +43,7 @@ typedef struct
     const size_t key_length;
     const char* value;
     const size_t value_length;
+    const int value_only;
     const json_item_type item_type;
 } json_item;
 
@@ -212,5 +213,19 @@ size_t parse_attributes(const char* json, size_t json_length);
  * @param json_length Total length of the JSON string.
  */
 void parse_json_object(const char* json, size_t json_length);
-    
+
+/**
+ * @brief Allocates or resizes a block of memory on the heap with safety guards.
+ *
+ * This function wraps realloc to provide bounds checking and overflow protection.
+ * If allocation fails or parameters are invalid, it logs an error and returns the
+ * original pointer to prevent memory leaks and data loss.
+ *
+ * @param heap_storage Pointer to the existing memory block (NULL for new allocation).
+ * @param size The size of a single element in bytes.
+ * @param count The number of elements to allocate.
+ * @return void* A pointer to the (re)allocated memory, or the original pointer on failure.
+ */
+void allocate_heap_storage(void** heap_storage, const size_t size, const size_t count);
+
 #endif
