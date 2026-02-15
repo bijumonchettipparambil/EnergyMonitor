@@ -16,11 +16,12 @@
  */
 typedef enum
 {
-    STRING = 0,
-    INTEGER = 1,
-    FLOAT = 2,
-    BOOLEAN = 3,
-    NULL_VALUE = 4
+    INIT = 0,
+    STRING = 1,
+    INTEGER = 2,
+    FLOAT = 3,
+    BOOLEAN = 4,
+    NULL_VALUE = 5
 
 } json_item_type;
 
@@ -143,7 +144,7 @@ int is_null(const char* json);
  * @param json_length Remaining length of the buffer.
  * @return Remaining json_length after consuming the string content.
  */
-size_t json_string(const char* json, size_t json_length);
+size_t parse_string(const char* json, size_t json_length);
 
 /**
  * @brief Consumes a numeric value from the JSON buffer.
@@ -151,7 +152,7 @@ size_t json_string(const char* json, size_t json_length);
  * @param json_length Remaining length of the buffer.
  * @return Remaining json_length after consuming the number.
  */
-size_t json_number(const char* json, size_t json_length);
+size_t parse_number(const char* json, size_t json_length);
 
 /**
  * @brief Consumes a boolean literal ("true" or "false") from the buffer.
@@ -159,7 +160,7 @@ size_t json_number(const char* json, size_t json_length);
  * @param json_length Remaining length of the buffer.
  * @return Remaining json_length after consuming the boolean.
  */
-size_t json_boolean(const char* json, size_t json_length);
+size_t parse_boolean(const char* json, size_t json_length);
 
 /**
  * @brief Consumes a "null" literal from the buffer.
@@ -167,7 +168,7 @@ size_t json_boolean(const char* json, size_t json_length);
  * @param json_length Remaining length of the buffer.
  * @return Remaining json_length after consuming "null".
  */
-size_t json_null(const char* json, size_t json_length);
+size_t parse_null(const char* json, size_t json_length);
 
 /**
  * @brief Checks if a character indicates a floating-point or scientific notation.
@@ -204,7 +205,8 @@ int is_quote_with_escape_sequence(const char* json);
  * @param json_length Remaining length of the buffer.
  * @return Updated remaining buffer length after processing the attribute.
  */
-size_t parse_attributes(const char* json, size_t json_length);
+size_t parse_attributes(const char* json, size_t json_length, json_item** current_item_address,
+        size_t* allocated_count, size_t* used_count);
 
 /**
  * @brief Primary entry point for the linear JSON parser.
@@ -212,7 +214,7 @@ size_t parse_attributes(const char* json, size_t json_length);
  * @param json Pointer to the start of the JSON string.
  * @param json_length Total length of the JSON string.
  */
-void parse_json_object(const char* json, size_t json_length);
+void parse_json_string(const char* json, size_t json_length);
 
 /**
  * @brief Allocates or resizes a block of memory on the heap with safety guards.
@@ -226,6 +228,6 @@ void parse_json_object(const char* json, size_t json_length);
  * @param count The number of elements to allocate.
  * @return void* A pointer to the (re)allocated memory, or the original pointer on failure.
  */
-void allocate_heap_storage(void** heap_storage, const size_t size, const size_t count);
+void* allocate_heap_storage(void* heap_storage, const size_t size, const size_t count);
 
 #endif
